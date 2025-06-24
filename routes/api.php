@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Api\{
     AuthApiController,
     DashboardApiController,
@@ -14,23 +15,25 @@ use App\Http\Controllers\Api\{
     NotifikasiApiController
 };
 
-// 👤 Login tanpa token
+// ✅ Register & Login tanpa token
+Route::post('/register', [AuthApiController::class, 'register']);
 Route::post('/login', [AuthApiController::class, 'login']);
 
 // 🔐 Semua route di bawah ini dilindungi oleh Sanctum
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    // Logout
+    // 🔒 Logout & Info user
     Route::post('/logout', [AuthApiController::class, 'logout']);
+    Route::get('/user/me', [AuthApiController::class, 'me']);
 
-    // INFORMASI UMUM
+    // 📋 Informasi umum
     Route::get('/informasi', [UserApiController::class, 'informasi']);
 
-    // 👑 ADMIN-ONLY ROUTES (opsional: validasi role bisa juga di controller)
+    // 👑 ADMIN-ONLY ROUTES (validasi role sebaiknya di controller)
     Route::get('/dashboard', [DashboardApiController::class, 'index']);
     Route::get('/data-user', [UserApiController::class, 'index']);
 
-    // 🔁 KONSUMEN CRUD
+    // 🔁 KONSUMEN
     Route::apiResource('/konsumen', KonsumenApiController::class);
     Route::post('/konsumen/{id}/reset-password', [KonsumenApiController::class, 'resetPassword']);
 
@@ -41,13 +44,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/pembayaran/{id}', [PembayaranApiController::class, 'destroy']);
     Route::patch('/pembayaran/{id}/status', [PembayaranApiController::class, 'updateStatus']);
 
-
-
     // 📊 LAPORAN
     Route::get('/laporan-pengguna', [LaporanApiController::class, 'index']);
 
-  
-    
     // 💰 TOP UP
     Route::get('/topup', [TopupApiController::class, 'index']);
     Route::patch('/topup/{id}/confirm', [TopupApiController::class, 'confirm']);
