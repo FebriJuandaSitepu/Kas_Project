@@ -1,73 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="csrf-token" content="{{ csrf_token() }}"> {{-- TAMBAH BARIS INI --}}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin Dashboard')</title>
-    <link rel="icon" type="image/png" href="{{ asset('assets/logo.png') }}?v=1.0">
-    <link rel="stylesheet" href="/css/dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
+
+    <link rel="icon" href="{{ asset('assets/logo.png') }}" type="image/png">
+
+    {{-- Styles --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            position: fixed;
+            background: linear-gradient(135deg, #1e1e2f, #2b2b45);
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar-header h4 {
+            font-weight: bold;
+            color: #ffc107;
+        }
+
+        .user-profile {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            background-color: #fff;
+            color: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+        }
+
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #aaa;
+            text-transform: uppercase;
+            margin: 15px 0 5px;
+        }
+
+        .nav-link {
+            color: #cfd8dc;
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .nav-link i {
+            margin-right: 10px;
+        }
+
+        .nav-link:hover,
+        .nav-link.fw-bold {
+            color: #ffc107;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+        }
+
+        .content {
+    margin-left: 300px;
+    width: 100%;
+    padding: 0;
+}
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .content {
+                margin-left: 0;
+            }
+        }
+    </style>
+
     @stack('styles')
 </head>
 <body>
-    <div class="dashboard-container">
-        {{-- Sidebar --}}
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-text">Flow State</div>
-            </div>
-            <div class="user-profile">
-                {{-- PASTIKAN ICON INI ADA DAN TERLIHAT --}}
-                <div class="profile-icon">
-                    <i class="fa-solid fa-user-circle"></i> {{-- Kembali ke ikon Font Awesome --}}
-                    {{-- Jika Anda ingin pakai gambar logo, ganti ini dengan: --}}
-                    {{-- <img src="{{ asset('assets/logo.png') }}" alt="Logo Anda" class="user-profile-logo"> --}}
-                </div>
-                <div class="profile-info">
-                    <span class="user-name">{{ Auth::user()->name }}</span>
-                    <span class="user-role"><span class="status-indicator online"></span> Online</span>
-                </div>
-            </div>
-            <nav class="sidebar-nav">
-                <div class="nav-section-title">MENU UTAMA</div>
-                <ul>
-                    <li id="menu-dashboard"><a href="{{ route('dashboard') }}"><span><i class="fa-solid fa-gauge"></i> Dashboard</span></a></li> {{-- Menggunakan ikon gauge --}}
-                    <li id="menu-konsumen"><a href="{{ route('konsumen') }}"><span><i class="fa-solid fa-users"></i> Data Konsumen</span></a></li>
-                    <li id="menu-lapangan"><a href="{{ route('lapangan.index') }}"><span><i class="fa-solid fa-futbol"></i> Data Lapangan</span></a></li>
-                    <li id="menu-fasilitas"><a href="{{ route('fasilitas.index') }}"><span><i class="fa-solid fa-building"></i> Data Fasilitas</span></a></li>
-                    <li id="menu-pemesanan"><a href="{{ route('pemesanan') }}"><span><i class="fa-solid fa-clipboard-list"></i> Data Pemesanan</span></a></li>
-                    <li id="menu-pembayaran"><a href="{{ route('pembayaran') }}"><span><i class="fa-solid fa-credit-card"></i> Data Pembayaran</span></a></li>
-                    <li id="menu-topup"><a href="{{ route('topup') }}"><span><i class="fa-solid fa-credit-card"></i> Top Up</span></a></li>
-                </ul>
-                <div class="nav-section-title">TENTANG</div>
-                <ul>
-                    <li id="menu-informasi"><a href="{{ route('informasi') }}"><span><i class="fa-solid fa-info-circle"></i> Informasi</span></a></li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <a href="{{ route('logout') }}" class="logout-btn"><span><i class="fa-solid fa-sign-out-alt"></i> Log Out</span></a>
-            </div>
-        </aside>
+<div class="d-flex">
+    {{-- Sidebar --}}
+    <aside class="sidebar">
+        <div class="sidebar-header text-center mb-4">
+            <h4>KasKN</h4>
+        </div>
 
-        {{-- Main Content --}}
-        <main class="content" id="mainContent">
-            {{-- Navbar --}}
-            <nav class="navbar">
-                <div class="navbar-right">
+        {{-- User Info --}}
+        @auth
+        <div class="user-profile">
+            <div class="avatar">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div>
+                <div class="fw-semibold text-white">{{ Auth::user()->name }}</div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="status-indicator bg-success rounded-circle"></span>
+                    <small class="text-success">Online</small>
                 </div>
-            </nav>
+            </div>
+        </div>
+        @endauth
 
-            {{-- Ini adalah tempat konten spesifik halaman akan di-inject --}}
-            @yield('content') 
-            
-        </main>
-    </div>
+        {{-- Menu Utama --}}
+        <div class="nav-section-title">Menu Utama</div>
+        <ul class="nav flex-column">
+    <li><a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'fw-bold' : '' }}"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+    <li><a href="{{ route('konsumen.index') }}" class="nav-link {{ request()->routeIs('konsumen.*') ? 'fw-bold' : '' }}"><i class="fa-solid fa-users"></i> Data User</a></li>
+    <li><a href="{{ route('pembayaran.index') }}" class="nav-link {{ request()->routeIs('pembayaran.*') ? 'fw-bold' : '' }}"><i class="fa-solid fa-credit-card"></i> Data Pembayaran</a></li>
+    <li><a href="{{ route('laporan.index') }}" class="nav-link {{ request()->routeIs('laporan.*') ? 'fw-bold' : '' }}"><i class="fa-solid fa-file-alt"></i> Laporan Pengguna</a></li>
+    <li><a href="{{ route('pemesanan') }}" class="nav-link {{ request()->is('pemesanan') ? 'fw-bold' : '' }}"><i class="fa-solid fa-clipboard-list"></i> Data Pemesanan</a></li>
+    <li><a href="{{ route('notifikasi.index') }}" class="nav-link {{ request()->routeIs('notifikasi.*') ? 'fw-bold' : '' }}"><i class="fa-solid fa-bell"></i> Notifikasi</a></li>
+    <li><a href="{{ route('topup') }}" class="nav-link {{ request()->is('topup') ? 'fw-bold' : '' }}"><i class="fa-solid fa-wallet"></i> Top Up</a></li>
+</ul>
 
-    <script src="/js/dashboard.js"></script>
-    {{-- TAMBAHKAN SCRIPT SWEETALERT2 DI SINI --}}
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @stack('scripts')
+        {{-- Tentang --}}
+        <div class="nav-section-title">Tentang</div>
+        <ul class="nav flex-column">
+            <li><a href="{{ route('informasi') }}" class="nav-link {{ request()->is('informasi') ? 'fw-bold' : '' }}"><i class="fa-solid fa-info-circle"></i> Informasi</a></li>
+        </ul>
+
+        {{-- Logout --}}
+        @auth
+        <div class="sidebar-footer mt-3">
+          <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button class="btn btn-danger w-100"><i class="fa-solid fa-sign-out-alt me-2"></i> Log Out</button>
+            </form>
+        </div>
+        @endauth
+    </aside>
+
+    {{-- Main Content --}}
+    <main class="content">
+        @yield('content')
+    </main>
+</div>
+
+{{-- Scripts --}}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('js/dashboard.js') }}"></script>
+@stack('scripts')
 </body>
 </html>

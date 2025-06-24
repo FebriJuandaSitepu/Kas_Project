@@ -10,7 +10,7 @@
 
 @section('content')
     <div class="page-header">
-        <h1>Pembayaran</h1>
+        <h1>Transaksi</h1>
         <p>Halaman Pembayaran</p>
     </div>
 

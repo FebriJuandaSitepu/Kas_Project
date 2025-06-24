@@ -1,49 +1,61 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\KonsumenApiController; // Import API Controller
-use App\Http\Controllers\Api\LapanganController; // Import API Controller
-use App\Http\Controllers\Api\FasilitasController; // Import API Controller
-use App\Http\Controllers\PemesananController;
-use App\Http\Controllers\Api\TopupApiController;
-use App\Http\Controllers\TopupController;
+use App\Http\Controllers\Api\{
+    AuthApiController,
+    DashboardApiController,
+    UserApiController,
+    KonsumenApiController,
+    PembayaranApiController,
+    LapanganApiController,
+    LaporanApiController,
+    PemesananApiController,
+    TopupApiController,
+    NotifikasiApiController
+};
+
+// 👤 Login tanpa token
+Route::post('/login', [AuthApiController::class, 'login']);
+
+// 🔐 Semua route di bawah ini dilindungi oleh Sanctum
+Route::middleware(['auth:sanctum'])->group(function () {
+
+    // Logout
+    Route::post('/logout', [AuthApiController::class, 'logout']);
+
+    // INFORMASI UMUM
+    Route::get('/informasi', [UserApiController::class, 'informasi']);
+
+    // 👑 ADMIN-ONLY ROUTES (opsional: validasi role bisa juga di controller)
+    Route::get('/dashboard', [DashboardApiController::class, 'index']);
+    Route::get('/data-user', [UserApiController::class, 'index']);
+
+    // 🔁 KONSUMEN CRUD
+    Route::apiResource('/konsumen', KonsumenApiController::class);
+    Route::post('/konsumen/{id}/reset-password', [KonsumenApiController::class, 'resetPassword']);
+
+    // 💸 PEMBAYARAN
+    Route::get('/pembayaran', [PembayaranApiController::class, 'index']);
+    Route::post('/pembayaran', [PembayaranApiController::class, 'store']);
+    Route::put('/pembayaran/{id}', [PembayaranApiController::class, 'update']);
+    Route::delete('/pembayaran/{id}', [PembayaranApiController::class, 'destroy']);
+    Route::patch('/pembayaran/{id}/status', [PembayaranApiController::class, 'updateStatus']);
 
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+    // 📊 LAPORAN
+    Route::get('/laporan-pengguna', [LaporanApiController::class, 'index']);
+
+  
+    
+    // 💰 TOP UP
+    Route::get('/topup', [TopupApiController::class, 'index']);
+    Route::patch('/topup/{id}/confirm', [TopupApiController::class, 'confirm']);
+    Route::post('/admin/topup/manual', [TopupApiController::class, 'topupManual']);
+    Route::post('/admin/topup/scan', [TopupApiController::class, 'verifikasiQR']);
+    Route::get('/admin/topup/histori', [TopupApiController::class, 'histori']);
+
+    // 🔔 NOTIFIKASI
+    Route::get('/notifikasi', [NotifikasiApiController::class, 'index']);
+    Route::post('/notifikasi', [NotifikasiApiController::class, 'kirim']);
 });
-
-// Router konsumen Register & Login
-Route::post('/konsumen/register', [KonsumenApiController::class, 'store']);
-Route::post('/konsumen/login', [KonsumenApiController::class, 'login']);
-
-// Api untuk lapangan
-Route::get('/lapangans', [LapanganController::class, 'index']); // Untuk daftar lapangan (sudah ada)
-Route::post('/lapangans', [LapanganController::class, 'store']); // Untuk tambah lapangan (sudah ada)
-Route::get('/lapangans/{id}', [LapanganController::class, 'show']); // Untuk ambil data lapangan tunggal (BARU DITAMBAHKAN)
-Route::put('/lapangans/{id}', [LapanganController::class, 'update']); // Untuk update lapangan (BARU DITAMBAHKAN)
-Route::delete('/lapangans/{id}', [LapanganController::class, 'destroy']); // Untuk hapus lapangan (sudah ada)
-
-Route::get('/fasilitas', [FasilitasController::class, 'index']); // Mengambil semua fasilitas
-Route::post('/fasilitas', [FasilitasController::class, 'store']); // Menambahkan fasilitas baru
-Route::get('/fasilitas/{id}', [FasilitasController::class, 'show']); // Mengambil fasilitas berdasarkan ID
-Route::put('/fasilitas/{id}', [FasilitasController::class, 'update']); // Memperbarui fasilitas
-Route::delete('/fasilitas/{id}', [FasilitasController::class, 'destroy']); // Menghapus fasilitas
-
-
-//Api Pemesanan
-// Rute untuk MENGAMBIL data pemesanan (GET request)
-Route::get('/pemesanan', [PemesananController::class, 'indexApi']); // Kita akan buat method indexApi
-// Rute untuk MENYIMPAN data pemesanan (POST request)
-Route::post('/pemesanan', [PemesananController::class, 'store']);
-
-// Top UP
-// Rute untuk Top Up dari Mobile App (Flutter)
-Route::post('/topup', [TopupApiController::class, 'store']);
-// Rute untuk konfirmasi Top Up dari Web Admin
-Route::patch('/topup/{id}/confirm', [TopupApiController::class, 'confirm']);
-
-// --- RUTE BARU UNTUK MENGAMBIL PROFIL KONSUMEN ---
-// Middleware 'auth:sanctum' memastikan hanya pengguna dengan token valid yang bisa akses.
-Route::middleware('auth:sanctum')->get('/profile', [KonsumenApiController::class, 'profile']);
