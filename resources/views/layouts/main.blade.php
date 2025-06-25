@@ -140,7 +140,12 @@
     <li><a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'fw-bold' : '' }}"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
     <li><a href="{{ route('konsumen.index') }}" class="nav-link {{ request()->routeIs('konsumen.*') ? 'fw-bold' : '' }}"><i class="fa-solid fa-users"></i> Data Konsumen</a></li>
     <li><a href="{{ route('pembayaran.index') }}" class="nav-link {{ request()->routeIs('pembayaran.*') ? 'fw-bold' : '' }}"><i class="fa-solid fa-credit-card"></i> Data Pembayaran</a></li>
-    <li><a href="{{ route('laporan.index') }}" class="nav-link {{ request()->routeIs('laporan.*') ? 'fw-bold' : '' }}"><i class="fa-solid fa-file-alt"></i> Laporan Pengguna</a></li>
+    <li>
+  <a href="{{ route('laporan.index') }}" class="nav-link {{ request()->routeIs('laporan.*') ? 'fw-bold' : '' }}">
+    <i class="fa-solid fa-file-alt"></i> Laporan Konsumen
+  </a>
+</li>
+
     <li><a href="{{ route('notifikasi.index') }}" class="nav-link {{ request()->routeIs('notifikasi.*') ? 'fw-bold' : '' }}"><i class="fa-solid fa-bell"></i> Notifikasi</a></li>
     <li><a href="{{ route('admin.topup') }}" class="nav-link {{ request()->routeIs('admin.topup') ? 'fw-bold' : '' }}"><i class="fa-solid fa-wallet"></i> Top Up</a></li>
 </ul>

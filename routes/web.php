@@ -81,7 +81,8 @@ Route::middleware(['auth', 'isadmin'])->group(function () {
         Route::post('/kirim', [NotifikasiController::class, 'kirim'])->name('kirim');
     });
     // LAPORAN
-Route::get('/laporan-pengguna', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/konsumen', [LaporanController::class, 'laporanKonsumen'])->name('laporan.index');
+
 
 
     Route::get('/notifikasi/kirim', function () {
