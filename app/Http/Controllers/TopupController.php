@@ -1,65 +1,96 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Topup; // <-- TAMBAHIN INI
+use App\Models\Topup;
+use App\Models\Konsumen;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 class TopupController extends Controller
 {
     public function index()
     {
-        // Ambil semua data topup, sekalian data konsumennya (biar enteng)
-        // Urutin dari yang paling baru
-        $topups = Topup::with('konsumen')->latest()->paginate(10); // Paginate biar ga berat
+        $topups = Topup::with('konsumen')->latest()->get();
+        $konsumens = Konsumen::all(); // untuk form input manual
 
-        return view('topup', ['topups' => $topups]); // Kirim data ke view
-    }
-    // app/Http/Controllers/TopupController.php
-public function verifikasiQR(Request $request)
-{
-    $userId = $request->input('user_id'); // Dikirim dari QR
-    $user = User::find($userId);
-
-    if (!$user) {
-        return back()->with('error', 'Pengguna tidak ditemukan!');
+        return view('topups.index', compact('topups', 'konsumens'));
     }
 
-    return view('topup.verifikasi', compact('user'));
-}
-public function histori()
-{
-    $topups = DB::table('topups')
-        ->join('users', 'topups.user_id', '=', 'users.id')
-        ->select('topups.*', 'users.name as nama_user')
-        ->orderByDesc('topups.created_at')
-        ->paginate(15);
+    public function histori()
+    {
+        $topups = Topup::with('konsumen')->orderByDesc('created_at')->paginate(15);
+        return view('topup.histori', compact('topups'));
+    }
 
-    return view('topup.histori', compact('topups'));
-}
-public function topupManual(Request $request)
-{
-    $request->validate([
-        'user_id' => 'required|exists:users,id',
-        'jumlah' => 'required|numeric|min:1000',
-    ]);
+    public function verifikasiQR(Request $request)
+    {
+        $id = $request->input('konsumen_id');
+        $konsumen = Konsumen::where('no_identitas', $id)->first();
 
-    // Tambah ke saldo user
-    $user = User::findOrFail($request->user_id);
-    $user->saldo += $request->jumlah;
-    $user->save();
+        if (!$konsumen) {
+            return back()->with('error', 'Konsumen tidak ditemukan.');
+        }
 
-    // Simpan ke tabel topup (jika ada)
-    DB::table('topups')->insert([
-        'user_id' => $user->id,
-        'jumlah' => $request->jumlah,
-        'status' => 'manual',
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
+        return view('topup.verifikasi', compact('konsumen'));
+    }
 
-    return redirect()->back()->with('success', 'Saldo berhasil ditambahkan.');
-}
+    public function topupManual(Request $request)
+    {
+        $request->validate([
+            'konsumen_id' => 'required|exists:konsumens,no_identitas',
+            'nominal' => 'required|numeric|min:1000',
+        ]);
 
+        $konsumen = Konsumen::where('no_identitas', $request->konsumen_id)->first();
+        $konsumen->saldo += $request->nominal;
+        $konsumen->save();
+
+        Topup::create([
+            'konsumen_id' => $konsumen->no_identitas,
+            'nominal' => $request->nominal,
+            'status' => 'diterima', // status valid untuk ditampilkan
+        ]);
+
+        return back()->with('success', 'Topup berhasil ditambahkan secara manual.');
+    }
+
+    public function konfirmasi($id)
+    {
+        $topup = Topup::with('konsumen')->findOrFail($id);
+        $topup->status = 'diterima';
+        $topup->save();
+
+        if ($topup->konsumen) {
+            $topup->konsumen->increment('saldo', $topup->nominal);
+        }
+
+        return redirect()->route('admin.topup')->with('success', 'Topup berhasil dikonfirmasi.');
+    }
+
+    public function storeFlutter(Request $request)
+    {
+        $request->validate([
+            'konsumen_id' => 'required|exists:konsumens,no_identitas',
+            'nominal' => 'required|numeric',
+            'bukti_transfer' => 'required|image|max:2048'
+        ]);
+
+        $path = $request->file('bukti_transfer')->store('bukti_transfer', 'public');
+
+        Topup::create([
+            'konsumen_id' => $request->konsumen_id,
+            'nominal' => $request->nominal,
+            'bukti_transfer' => $path,
+            'status' => 'pending',
+        ]);
+
+        return response()->json(['message' => 'Berhasil dikirim. Menunggu konfirmasi admin.']);
+    }
+
+    public function show($id)
+    {
+        $topup = Topup::with('konsumen')->findOrFail($id);
+        return view('topup.show', compact('topup'));
+    }
 }

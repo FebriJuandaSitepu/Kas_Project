@@ -15,46 +15,49 @@ use App\Http\Controllers\Api\{
     NotifikasiApiController
 };
 
-// ✅ Register & Login tanpa token
-Route::post('/register', [AuthApiController::class, 'register']);
+// ✅ Auth umum
 Route::post('/login', [AuthApiController::class, 'login']);
+Route::post('/register', [AuthApiController::class, 'register']);
+// Optional: reset password API
+// Route::post('/forgot-password', ...);
 
-// 🔐 Semua route di bawah ini dilindungi oleh Sanctum
 Route::middleware(['auth:sanctum'])->group(function () {
 
-    // 🔒 Logout & Info user
+    // 🔐 Authenticated User
     Route::post('/logout', [AuthApiController::class, 'logout']);
     Route::get('/user/me', [AuthApiController::class, 'me']);
 
-    // 📋 Informasi umum
+    // 📄 Info umum
     Route::get('/informasi', [UserApiController::class, 'informasi']);
 
-    // 👑 ADMIN-ONLY ROUTES (validasi role sebaiknya di controller)
-    Route::get('/dashboard', [DashboardApiController::class, 'index']);
-    Route::get('/data-user', [UserApiController::class, 'index']);
-
-    // 🔁 KONSUMEN
+    // 🔁 Konsumen
     Route::apiResource('/konsumen', KonsumenApiController::class);
     Route::post('/konsumen/{id}/reset-password', [KonsumenApiController::class, 'resetPassword']);
 
-    // 💸 PEMBAYARAN
+    // 💳 Pembayaran
     Route::get('/pembayaran', [PembayaranApiController::class, 'index']);
     Route::post('/pembayaran', [PembayaranApiController::class, 'store']);
     Route::put('/pembayaran/{id}', [PembayaranApiController::class, 'update']);
     Route::delete('/pembayaran/{id}', [PembayaranApiController::class, 'destroy']);
     Route::patch('/pembayaran/{id}/status', [PembayaranApiController::class, 'updateStatus']);
 
-    // 📊 LAPORAN
-    Route::get('/laporan-pengguna', [LaporanApiController::class, 'index']);
-
-    // 💰 TOP UP
+    // 💰 Topup
     Route::get('/topup', [TopupApiController::class, 'index']);
     Route::patch('/topup/{id}/confirm', [TopupApiController::class, 'confirm']);
-    Route::post('/admin/topup/manual', [TopupApiController::class, 'topupManual']);
-    Route::post('/admin/topup/scan', [TopupApiController::class, 'verifikasiQR']);
-    Route::get('/admin/topup/histori', [TopupApiController::class, 'histori']);
+    Route::post('/topup/manual', [TopupApiController::class, 'topupManual']);
+    Route::post('/topup/scan', [TopupApiController::class, 'verifikasiQR']);
+    Route::get('/topup/histori', [TopupApiController::class, 'histori']);
+    Route::post('/topup', [TopupApiController::class, 'storeFlutter']);
 
-    // 🔔 NOTIFIKASI
+    // 🔔 Notifikasi (user & admin)
     Route::get('/notifikasi', [NotifikasiApiController::class, 'index']);
-    Route::post('/notifikasi', [NotifikasiApiController::class, 'kirim']);
+
+    // 👑 ADMIN ONLY
+    Route::middleware(['isadmin'])->group(function () {
+        Route::get('/dashboard', [DashboardApiController::class, 'index']);
+        Route::get('/data-user', [UserApiController::class, 'index']);
+        Route::get('/laporan-pengguna', [LaporanApiController::class, 'index']);
+        Route::post('/notifikasi', [NotifikasiApiController::class, 'kirim']);
+    });
 });
+

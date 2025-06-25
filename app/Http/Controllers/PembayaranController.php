@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pembayaran;
-use App\Models\User;
+use App\Models\Konsumen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,11 +11,11 @@ class PembayaranController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pembayaran::with('user');
+        $query = Pembayaran::with('konsumen');
 
         if ($request->filled('search')) {
-            $query->whereHas('user', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%');
+            $query->whereHas('konsumen', function ($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -28,28 +28,24 @@ class PembayaranController extends Controller
         return view('pembayaran.index', compact('pembayaran'));
     }
 
-    public function create()
+    // Form create dengan parameter tipe opsional
+    public function create($tipe = null)
     {
-        $users = User::all();
-        return view('pembayaran.create', compact('users'));
+        $konsumens = Konsumen::all();
+
+        // Validasi tipe jika diberikan
+        if ($tipe && !in_array($tipe, ['pemasukan', 'pengeluaran'])) {
+            abort(404, 'Tipe pembayaran tidak valid.');
+        }
+
+        return view('pembayaran.create', compact('konsumens', 'tipe'));
     }
 
-    public function createPemasukan()
-    {
-        $users = User::all();
-        return view('pembayaran.create_pemasukan', compact('users'));
-    }
-
-    public function createPengeluaran()
-    {
-        $users = User::all();
-        return view('pembayaran.create_pengeluaran', compact('users'));
-    }
-
+    // Simpan pembayaran baru
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'konsumen_id' => 'required|exists:konsumens,no_identitas',
             'tipe' => 'required|in:pemasukan,pengeluaran',
             'jumlah' => 'required|numeric|min:0',
             'metode' => 'required|string|max:100',
@@ -63,7 +59,7 @@ class PembayaranController extends Controller
         }
 
         Pembayaran::create([
-            'user_id' => $validated['user_id'],
+            'konsumen_id' => $validated['konsumen_id'],
             'tipe' => $validated['tipe'],
             'jumlah' => $validated['jumlah'],
             'metode' => $validated['metode'],
@@ -75,12 +71,16 @@ class PembayaranController extends Controller
         return redirect()->route('pembayaran.index')->with('success', 'Data pembayaran berhasil disimpan.');
     }
 
+    // Form edit pembayaran
     public function edit($id)
     {
         $pembayaran = Pembayaran::findOrFail($id);
-        return view('pembayaran.edit', compact('pembayaran'));
+        $konsumens = Konsumen::all();
+
+        return view('pembayaran.edit', compact('pembayaran', 'konsumens'));
     }
 
+    // Update pembayaran
     public function update(Request $request, $id)
     {
         $validated = $request->validate([
@@ -93,9 +93,7 @@ class PembayaranController extends Controller
 
         $pembayaran = Pembayaran::findOrFail($id);
 
-        // Upload bukti baru (jika ada)
         if ($request->hasFile('bukti')) {
-            // Hapus file lama jika ada
             if ($pembayaran->bukti && Storage::disk('public')->exists($pembayaran->bukti)) {
                 Storage::disk('public')->delete($pembayaran->bukti);
             }
@@ -104,7 +102,6 @@ class PembayaranController extends Controller
             $pembayaran->bukti = $buktiBaru;
         }
 
-        // Update data lainnya
         $pembayaran->update([
             'jumlah' => $validated['jumlah'],
             'metode' => $validated['metode'],
@@ -115,6 +112,7 @@ class PembayaranController extends Controller
         return redirect()->route('pembayaran.index')->with('success', 'Data pembayaran berhasil diperbarui.');
     }
 
+    // Update status pembayaran
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
@@ -128,11 +126,11 @@ class PembayaranController extends Controller
         return redirect()->route('pembayaran.index')->with('success', 'Status pembayaran berhasil diperbarui.');
     }
 
+    // Hapus pembayaran
     public function destroy($id)
     {
         $pembayaran = Pembayaran::findOrFail($id);
 
-        // Hapus file bukti jika ada
         if ($pembayaran->bukti && Storage::disk('public')->exists($pembayaran->bukti)) {
             Storage::disk('public')->delete($pembayaran->bukti);
         }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Konsumen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -13,82 +13,88 @@ class KonsumenController extends Controller
         $this->middleware('auth');
     }
 
-    // Menampilkan semua user yang bukan admin
+    // Menampilkan semua data konsumen
     public function index()
     {
-        $users = User::where('role', '!=', 'admin')->get();
-        return view('konsumen.index', compact('users'));
+        $konsumens = Konsumen::all();
+        return view('konsumen.index', compact('konsumens'));
     }
 
-    // Menampilkan form tambah user
+    // Menampilkan form tambah konsumen
     public function create()
     {
         return view('konsumen.form', [
-            'user' => new User()
+            'konsumen' => new Konsumen()
         ]);
     }
 
-    // Menyimpan data user baru
+    // Menyimpan data konsumen baru
     public function store(Request $request)
     {
         $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'role'  => 'required|string',
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:konsumens,email',
+            'no_telepon' => 'nullable|string|max:15',
+            'password' => 'required|string|min:6',
         ]);
 
-        User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'role'     => $request->role,
-            'password' => Hash::make('password123'), // default password
-        ]);
+        $kode = 'KNS' . str_pad(Konsumen::count() + 1, 3, '0', STR_PAD_LEFT);
 
-        return redirect()->route('konsumen.index')->with('success', 'User berhasil ditambahkan.');
-    }
-
-    // Menampilkan form edit user
-    public function edit(User $user)
-    {
-        return view('konsumen.form', [
-            'user' => $user
-        ]);
-    }
-
-    // Update data user
-    public function update(Request $request, User $user)
-    {
-        $request->validate([
-            'name'  => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'role'  => 'required|string',
-        ]);
-
-        $user->update([
-            'name'  => $request->name,
+        Konsumen::create([
+            'no_identitas' => $kode,
+            'nama' => $request->nama,
             'email' => $request->email,
-            'role'  => $request->role,
+            'no_telepon' => $request->no_telepon,
+            'saldo' => 0,
+            'password' => bcrypt($request->password),
         ]);
 
-        return redirect()->route('konsumen.index')->with('success', 'User berhasil diupdate.');
+        return redirect()->route('konsumen.index')->with('success', 'Konsumen berhasil ditambahkan.');
     }
 
-    // Hapus user
-   public function destroy($id)
-{
-    $user = User::findOrFail($id);
-    $user->delete();
-    return redirect()->route('konsumen.index')->with('success', 'User berhasil dihapus.');
-}
+    // Menampilkan form edit konsumen
+    public function edit($id)
+    {
+        $konsumen = Konsumen::findOrFail($id);
+        return view('konsumen.form', compact('konsumen'));
+    }
 
+    // Update data konsumen
+    public function update(Request $request, $id)
+    {
+        $konsumen = Konsumen::findOrFail($id);
 
-    // Reset password user ke default
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|unique:konsumens,email,' . $konsumen->id,
+            'no_telepon' => 'nullable|string|max:15',
+        ]);
+
+        $konsumen->update([
+            'nama' => $request->nama,
+            'email' => $request->email,
+            'no_telepon' => $request->no_telepon,
+        ]);
+
+        return redirect()->route('konsumen.index')->with('success', 'Konsumen berhasil diupdate.');
+    }
+
+    // Hapus konsumen
+    public function destroy($id)
+    {
+        $konsumen = Konsumen::findOrFail($id);
+        $konsumen->delete();
+
+        return redirect()->route('konsumen.index')->with('success', 'Konsumen berhasil dihapus.');
+    }
+
+    // Reset password konsumen ke default
     public function resetPassword($id)
     {
-        $user = User::findOrFail($id);
-        $user->password = Hash::make('password123');
-        $user->save();
+        $konsumen = Konsumen::findOrFail($id);
+        $konsumen->password = Hash::make('password123');
+        $konsumen->save();
 
-        return back()->with('success', 'Password berhasil direset ke default.');
+        return back()->with('success', 'Password konsumen berhasil direset ke default.');
     }
 }

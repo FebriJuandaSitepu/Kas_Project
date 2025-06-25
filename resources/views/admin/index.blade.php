@@ -1,40 +1,88 @@
 @extends('layouts.main')
-@section('title', 'Manajemen User')
+
+@section('title', 'Dashboard')
 
 @section('content')
-<div class="container mt-4">
-    <h2>Manajemen User</h2>
+<div class="container-fluid">
+    <h1 class="mb-4 fw-bold text-center">Dashboard</h1>
 
-    @if(session('success'))
-        <div class="alert alert-success mt-2">{{ session('success') }}</div>
-    @endif
+    {{-- Info Cards --}}
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-white bg-primary shadow-sm rounded">
+                <div class="card-body text-center">
+                    <h5>Total Pengguna</h5>
+                    <h2>{{ $totalPengguna }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-white bg-success shadow-sm rounded">
+                <div class="card-body text-center">
+                    <h5>Total Pembayaran</h5>
+                    <h2>{{ $totalPembayaran }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-white bg-info shadow-sm rounded">
+                <div class="card-body text-center">
+                    <h5>Total Pemasukan</h5>
+                    <h2>Rp {{ number_format($totalPemasukan, 0, ',', '.') }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-white bg-danger shadow-sm rounded">
+                <div class="card-body text-center">
+                    <h5>Total Pengeluaran</h5>
+                    <h2>Rp {{ number_format($totalPengeluaran, 0, ',', '.') }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <table class="table table-bordered mt-3">
-        <thead class="table-dark">
-            <tr>
-                <th>Nama</th>
-                <th>Email</th>
-                <th>Terdaftar</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($users as $user)
-            <tr>
-                <td>{{ $user->name }}</td>
-                <td>{{ $user->email }}</td>
-                <td>{{ $user->created_at->format('d-m-Y') }}</td>
-                <td>
-                    <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-warning">Edit</a>
-                    <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin ingin hapus user ini?')">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-sm btn-danger">Hapus</button>
-                    </form>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+    {{-- Notifikasi --}}
+    <div class="alert alert-warning text-center fw-semibold" role="alert">
+        <i class="fa fa-bell me-2"></i> Jangan lupa cek dan validasi transaksi hari ini!
+    </div>
+
+    {{-- Tabel Transaksi Terakhir --}}
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-dark text-white fw-semibold">
+            <i class="fa fa-clock me-2"></i> Transaksi Terakhir
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped mb-0 text-center">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Konsumen</th>
+                            <th>Tipe</th>
+                            <th>Jumlah</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($transaksiTerakhir as $index => $transaksi)
+<tr>
+    <td>{{ $index + 1 }}</td>
+    <td>{{ $transaksi->konsumen->nama ?? '-' }}</td>
+    <td>{{ ucfirst($transaksi->tipe) }}</td>
+    <td>Rp {{ number_format($transaksi->jumlah, 0, ',', '.') }}</td>
+    <td>{{ $transaksi->created_at->format('d M Y') }}</td>
+</tr>
+@empty
+<tr>
+    <td colspan="5" class="text-center">Tidak ada transaksi ditemukan.</td>
+</tr>
+@endforelse
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection

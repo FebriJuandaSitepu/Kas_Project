@@ -13,10 +13,6 @@ class Kernel extends HttpKernel
      *
      * @var array<int, class-string|string>
      */
-    protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\AuthMiddleware::class,
-    ];
-
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
         \App\Http\Middleware\TrustProxies::class,
@@ -50,15 +46,15 @@ class Kernel extends HttpKernel
     ];
 
     /**
-     * The application's middleware aliases.
+     * The application's route middleware aliases.
      *
      * Aliases may be used instead of class names to conveniently assign middleware to routes and groups.
      *
      * @var array<string, class-string|string>
      */
     protected $middlewareAliases = [
-       'auth' => \App\Http\Middleware\Authenticate::class,
-         'isadmin' => \App\Http\Middleware\IsAdmin::class,
+        'auth' => \App\Http\Middleware\Authenticate::class,
+        'isadmin' => \App\Http\Middleware\IsAdmin::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
@@ -69,7 +65,5 @@ class Kernel extends HttpKernel
         'signed' => \App\Http\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        
-
     ];
 }

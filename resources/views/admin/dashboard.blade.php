@@ -58,7 +58,7 @@
                     <thead class="table-light">
                         <tr>
                             <th>No</th>
-                            <th>Nama Pengguna</th>
+                            <th>Nama Konsumen</th>
                             <th>Tipe</th>
                             <th>Jumlah</th>
                             <th>Tanggal</th>
@@ -68,7 +68,7 @@
                         @forelse ($transaksiTerakhir as $index => $transaksi)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
-                                <td>{{ $transaksi->user->name ?? '-' }}</td>
+                                <td>{{ $transaksi->konsumen->nama ?? '-' }}</td>
                                 <td>{{ ucfirst($transaksi->tipe) }}</td>
                                 <td>Rp {{ number_format($transaksi->jumlah, 0, ',', '.') }}</td>
                                 <td>{{ $transaksi->created_at->format('d M Y') }}</td>

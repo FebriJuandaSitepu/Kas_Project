@@ -9,17 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('topups', function (Blueprint $table) {
-            // ID kita buat string untuk menampung format 'TP001'
-            $table->string('id')->primary();
-            
+    $table->id(); // auto-increment primary key
+    $table->string('konsumen_id');
+    $table->integer('nominal');
+    $table->string('status');
+    $table->string('bukti_transfer')->nullable();
+    $table->timestamps();
+});
 
-            // Foreign key ke tabel konsumen
-            $table->string('konsumen_id', 255);
-            $table->foreign('konsumen_id')->references('no_identitas')->on('konsumens')->onDelete('cascade');
-            $table->decimal('nominal', 15, 2); // Kolom untuk nominal, presisi untuk angka besar
-            $table->string('status')->default('Pending'); // Status default adalah 'Pending'
-            $table->timestamps();
-        });
     }
 
     public function down(): void

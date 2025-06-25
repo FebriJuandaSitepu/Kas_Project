@@ -9,7 +9,7 @@
     {{-- Filter --}}
     <form method="GET" action="{{ route('pembayaran.index') }}" class="row g-3 mb-4">
         <div class="col-md-4">
-            <input type="text" name="search" class="form-control" placeholder="Cari Nama User..." value="{{ request('search') }}">
+            <input type="text" name="search" class="form-control" placeholder="Cari Nama Konsumen..." value="{{ request('search') }}">
         </div>
         <div class="col-md-3">
             <select name="status" class="form-select" onchange="this.form.submit()">
@@ -28,15 +28,17 @@
     </form>
 
     {{-- Tombol Tambah --}}
-    <a href="{{ route('pembayaran.pemasukan.create') }}" class="btn btn-success mb-3 float-end">+ Tambah Pemasukan</a>
-    <a href="{{ route('pembayaran.pengeluaran.create') }}" class="btn btn-danger mb-3 float-end me-2">+ Tambah Pengeluaran</a>
+    <div class="mb-3">
+        <a href="{{ route('pembayaran.create', ['tipe' => 'pemasukan']) }}" class="btn btn-success btn-sm">Tambah Pemasukan</a>
+        <a href="{{ route('pembayaran.create', ['tipe' => 'pengeluaran']) }}" class="btn btn-danger btn-sm">Tambah Pengeluaran</a>
+    </div>
 
     {{-- Tabel Data --}}
     <table class="table table-bordered table-striped">
         <thead class="table-light">
             <tr>
                 <th>ID</th>
-                <th>User</th>
+                <th>Nama Konsumen</th>
                 <th>Tipe</th>
                 <th>Jumlah</th>
                 <th>Metode</th>
@@ -50,7 +52,7 @@
             @forelse($pembayaran as $item)
                 <tr>
                     <td>{{ $item->id }}</td>
-                    <td>{{ $item->user->name ?? '-' }}</td>
+                    <td>{{ $item->konsumen->nama ?? '-' }}</td>
                     <td>{{ ucfirst($item->tipe) }}</td>
                     <td>Rp{{ number_format($item->jumlah, 0, ',', '.') }}</td>
                     <td>{{ $item->metode }}</td>

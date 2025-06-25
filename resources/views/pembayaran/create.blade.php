@@ -1,19 +1,17 @@
 @extends('layouts.main')
 
-@section('title', 'Tambah Pembayaran')
-
 @section('content')
 <div class="container mt-4">
-    <h2 class="mb-4">Tambah Pembayaran Manual</h2>
+    <h2>Form Tambah Pembayaran</h2>
 
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    @if ($errors->any())
+    @if($errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0">
-                @foreach ($errors->all() as $error)
+                @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
@@ -23,47 +21,55 @@
     <form action="{{ route('pembayaran.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
+        {{-- Konsumen --}}
         <div class="mb-3">
-            <label for="user_id" class="form-label">Pilih User</label>
-            <select name="user_id" class="form-select" required>
-                <option value="">-- Pilih User --</option>
-                @foreach($users as $user)
-                    <option value="{{ $user->id }}">{{ $user->name }}</option>
+            <label for="konsumen_id">Pilih Konsumen</label>
+            <select name="konsumen_id" class="form-control" required>
+                <option value="">-- Pilih Konsumen --</option>
+                @foreach($konsumens as $konsumen)
+                    <option value="{{ $konsumen->no_identitas }}" {{ old('konsumen_id') == $konsumen->no_identitas ? 'selected' : '' }}>
+                        {{ $konsumen->nama }}
+                    </option>
                 @endforeach
             </select>
         </div>
 
+        {{-- Tipe --}}
         <div class="mb-3">
-            <label for="tipe" class="form-label">Tipe Transaksi</label>
-            <select name="tipe" class="form-select" required>
+            <label for="tipe">Tipe Pembayaran</label>
+            <select name="tipe" class="form-control" required>
                 <option value="">-- Pilih Tipe --</option>
-                <option value="pemasukan">Pemasukan</option>
-                <option value="pengeluaran">Pengeluaran</option>
+                <option value="pemasukan" {{ old('tipe', $tipe ?? '') == 'pemasukan' ? 'selected' : '' }}>Pemasukan</option>
+                <option value="pengeluaran" {{ old('tipe', $tipe ?? '') == 'pengeluaran' ? 'selected' : '' }}>Pengeluaran</option>
             </select>
         </div>
 
+        {{-- Jumlah --}}
         <div class="mb-3">
-            <label for="jumlah" class="form-label">Jumlah</label>
-            <input type="number" name="jumlah" class="form-control" required>
+            <label for="jumlah">Jumlah</label>
+            <input type="number" name="jumlah" class="form-control" value="{{ old('jumlah') }}" required>
         </div>
 
+        {{-- Metode --}}
         <div class="mb-3">
-            <label for="metode" class="form-label">Metode Pembayaran</label>
-            <input type="text" name="metode" class="form-control" placeholder="Contoh: Transfer Bank" required>
+            <label for="metode">Metode Pembayaran</label>
+            <input type="text" name="metode" class="form-control" value="{{ old('metode') }}" required>
         </div>
 
+        {{-- Tanggal --}}
         <div class="mb-3">
-            <label for="tanggal" class="form-label">Tanggal Pembayaran</label>
-            <input type="date" name="tanggal" class="form-control" required>
+            <label for="tanggal">Tanggal</label>
+            <input type="date" name="tanggal" class="form-control" value="{{ old('tanggal') }}" required>
         </div>
 
+        {{-- Bukti --}}
         <div class="mb-3">
-            <label for="bukti_pembayaran" class="form-label">Upload Bukti Pembayaran</label>
-            <input type="file" name="bukti_pembayaran" class="form-control" accept="image/*,application/pdf">
+            <label for="bukti">Bukti Pembayaran (opsional)</label>
+            <input type="file" name="bukti" class="form-control">
         </div>
 
         <button type="submit" class="btn btn-primary">Simpan</button>
-        <a href="{{ route('pembayaran.index') }}" class="btn btn-secondary">Kembali</a>
+        <a href="{{ route('pembayaran.index') }}" class="btn btn-secondary">Batal</a>
     </form>
 </div>
 @endsection

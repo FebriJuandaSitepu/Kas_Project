@@ -1,5 +1,6 @@
 <?php
 
+// routes/web.php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\{
     UserController,
@@ -34,8 +35,6 @@ Route::post('/register', [RegisterController::class, 'register']);
 // =======================
 Route::middleware(['auth'])->group(function () {
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
-
-    // HALAMAN INFORMASI (UMUM)
     Route::get('/informasi', [UserController::class, 'showInformasi'])->name('informasi');
 });
 
@@ -44,52 +43,47 @@ Route::middleware(['auth'])->group(function () {
 // =======================
 Route::middleware(['auth', 'isadmin'])->group(function () {
 
-    // DASHBOARD
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // DATA USER
     Route::get('/data-user', [UserController::class, 'index'])->name('user.index');
 
-    // DATA KONSUMEN
+    // KONSUMEN
     Route::resource('konsumen', KonsumenController::class);
     Route::post('/konsumen/{id}/reset-password', [KonsumenController::class, 'resetPassword'])->name('konsumen.resetPassword');
 
-    // DATA PEMBAYARAN & TRANSAKSI KAS
-    Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
-        Route::get('/', [PembayaranController::class, 'index'])->name('index');
-        Route::get('/create', [PembayaranController::class, 'create'])->name('create');
-        Route::get('/pemasukan/create', [PembayaranController::class, 'createPemasukan'])->name('pemasukan.create');
-        Route::get('/pengeluaran/create', [PembayaranController::class, 'createPengeluaran'])->name('pengeluaran.create');
-        Route::post('/', [PembayaranController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [PembayaranController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [PembayaranController::class, 'update'])->name('update');
-        Route::delete('/{id}', [PembayaranController::class, 'destroy'])->name('destroy');
-        Route::patch('/{id}/status', [PembayaranController::class, 'updateStatus'])->name('status');
-    });
+   Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
+    Route::get('/', [PembayaranController::class, 'index'])->name('index');
 
-    // DATA LAPANGAN
-    Route::get('/lapangan', [LapanganController::class, 'index'])->name('lapangan.index');
+    // Menggabungkan route create dengan parameter opsional {tipe?}
+    Route::get('/create/{tipe?}', [PembayaranController::class, 'create'])->name('create');
 
-    // LAPORAN
-    Route::get('/laporan-pengguna', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::post('/', [PembayaranController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [PembayaranController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [PembayaranController::class, 'update'])->name('update');
+    Route::delete('/{id}', [PembayaranController::class, 'destroy'])->name('destroy');
+    Route::patch('/{id}/status', [PembayaranController::class, 'updateStatus'])->name('status');
+});
 
-    // PEMESANAN
-    Route::get('/pemesanan', [PemesananController::class, 'index'])->name('pemesanan');
 
-    // TOP UP
-    Route::get('/topup', [TopupController::class, 'index'])->name('topup');
-    Route::patch('/topup/{id}/confirm', [TopupApiController::class, 'confirm'])->name('topup.confirm');
-    Route::post('/admin/topup/scan', [TopupController::class, 'verifikasiQR'])->name('admin.topup.verifikasiQR');
+    // TOPUP
+    Route::get('/admin/topup', [TopupController::class, 'index'])->name('admin.topup');
     Route::get('/admin/topup/histori', [TopupController::class, 'histori'])->name('admin.topup.histori');
     Route::post('/admin/topup/manual', [TopupController::class, 'topupManual'])->name('admin.topup.manual');
+    Route::post('/admin/topup/scan', [TopupController::class, 'verifikasiQR'])->name('admin.topup.verifikasiQR');
+    Route::patch('/admin/topup/{id}/confirm', [TopupController::class, 'konfirmasi'])->name('admin.topup.konfirmasi');
+    Route::get('/admin/topup/{id}', [TopupController::class, 'show'])->name('topup.show');
+
+    // Form manual topup digabung di halaman index
+   Route::post('/admin/topup/create-manual', [TopupController::class, 'topupManual'])->name('admin.topup.create');
 
     // NOTIFIKASI
     Route::prefix('notifikasi')->name('notifikasi.')->group(function () {
         Route::get('/', [NotifikasiController::class, 'index'])->name('index');
         Route::post('/kirim', [NotifikasiController::class, 'kirim'])->name('kirim');
     });
+    // LAPORAN
+Route::get('/laporan-pengguna', [LaporanController::class, 'index'])->name('laporan.index');
 
-    // FORM KIRIM NOTIFIKASI
+
     Route::get('/notifikasi/kirim', function () {
         $users = \App\Models\User::all();
         return view('notifikasi.kirim', compact('users'));

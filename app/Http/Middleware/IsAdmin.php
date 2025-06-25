@@ -10,6 +10,12 @@ class IsAdmin
 {
     /**
      * Handle an incoming request.
+     *
+     * Hanya izinkan akses jika user terautentikasi dan memiliki peran admin.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next)
     {

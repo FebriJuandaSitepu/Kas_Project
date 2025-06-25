@@ -21,37 +21,39 @@
         </div>
 
         {{-- Cek apakah ada data --}}
-        @if($users->count() > 0)
+        @if($konsumens->count() > 0)
             <div class="table-responsive">
                 <table class="table table-bordered table-striped align-middle">
                     <thead class="table-light text-center">
                         <tr>
+                            <th>No. Identitas</th>
                             <th>Nama</th>
                             <th>Email</th>
-                            <th>Role</th>
+                            <th>No Telepon</th>
                             <th style="width:220px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($users as $user)
+                        @foreach($konsumens as $konsumen)
                         <tr>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>{{ ucfirst($user->role) }}</td>
+                            <td>{{ $konsumen->no_identitas }}</td>
+                            <td>{{ $konsumen->nama }}</td>
+                            <td>{{ $konsumen->email }}</td>
+                            <td>{{ $konsumen->no_telepon ?? '-' }}</td>
                             <td>
                                 <div class="d-flex gap-1 flex-wrap justify-content-center">
                                     {{-- Tombol Edit --}}
-                                    <a href="{{ route('konsumen.edit', $user->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="{{ route('konsumen.edit', $konsumen->no_identitas) }}" class="btn btn-warning btn-sm">Edit</a>
 
                                     {{-- Tombol Hapus --}}
-                                    <form action="{{ route('konsumen.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus user ini?')">
+                                    <form action="{{ route('konsumen.destroy', $konsumen->no_identitas) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus konsumen ini?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
                                     </form>
 
                                     {{-- Tombol Reset Password --}}
-                                    <form action="{{ route('konsumen.resetPassword', $user->id) }}" method="POST" onsubmit="return confirm('Reset password user ini ke default?')">
+                                    <form action="{{ route('konsumen.resetPassword', $konsumen->no_identitas) }}" method="POST" onsubmit="return confirm('Reset password konsumen ini ke default?')">
                                         @csrf
                                         <button type="submit" class="btn btn-secondary btn-sm">Reset Password</button>
                                     </form>

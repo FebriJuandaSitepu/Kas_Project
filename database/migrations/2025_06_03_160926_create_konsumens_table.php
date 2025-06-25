@@ -11,15 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('konsumens', function (Blueprint $table) {
-            $table->string('no_identitas')->primary(); // ID kustom seperti 'LP001'
-            $table->string('nama');
-            $table->string('email')->unique();
-            $table->string('no_telepon')->nullable();
-            $table->decimal('saldo', 15, 2)->default(0);
-            $table->string('password'); // Password dari mobile, akan di-hash
-            $table->timestamps(); // created_at dan updated_at
-        });
+        // 2025_06_24_000000_create_konsumens_table.php
+
+Schema::create('konsumens', function (Blueprint $table) {
+    $table->string('no_identitas')->primary();
+    $table->string('nama');
+    $table->string('email')->unique();
+    $table->string('no_telepon')->nullable();
+    $table->integer('saldo')->default(0);
+    $table->string('password');
+    $table->timestamps();
+});
+
     }
 
     /**

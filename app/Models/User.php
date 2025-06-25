@@ -12,7 +12,7 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Atribut yang boleh diisi massal
      *
      * @var array<int, string>
      */
@@ -20,11 +20,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-            'saldo'
+        'saldo',
+        'role',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * Atribut yang disembunyikan saat serialisasi (misal ke JSON)
      *
      * @var array<int, string>
      */
@@ -34,7 +35,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast.
+     * Konversi tipe data otomatis
      *
      * @var array<string, string>
      */
@@ -44,7 +45,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Relasi ke tabel pembayaran
+     * Relasi: user punya banyak pembayaran
      */
     public function pembayaran()
     {

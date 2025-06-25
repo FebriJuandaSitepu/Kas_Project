@@ -9,28 +9,33 @@ class Pembayaran extends Model
 {
     use HasFactory;
 
-    // Nama tabel (opsional jika mengikuti konvensi Laravel)
+    // Nama tabel eksplisit (jika tidak pakai plural default)
     protected $table = 'pembayaran';
 
-    // Kolom yang dapat diisi
+    // Kolom yang dapat diisi (mass assignment)
     protected $fillable = [
-        'user_id',
-        'tipe',
+        'user_id',          // admin/operator yang memproses
+        'konsumen_id',      // relasi ke Konsumen (no_identitas)
+        'tipe',             // pemasukan / pengeluaran
         'jumlah',
         'metode',
         'tanggal',
         'status',
         'bukti',
-        'pemesanan_id', // tambahkan jika kolom ini ada di database
+        'bukti_pembayaran', // jika kamu memang menyimpan 2 bukti
+        'deskripsi',
+        'pemesanan_id',     // jika berasal dari pemesanan
     ];
 
-    // Casting otomatis ke objek tanggal (Carbon)
+    // Otomatis cast ke objek tanggal
     protected $casts = [
-        'tanggal' => 'datetime',
+        'tanggal'     => 'datetime',
+        'created_at'  => 'datetime',
+        'updated_at'  => 'datetime',
     ];
 
     /**
-     * Relasi ke user yang melakukan pembayaran.
+     * Relasi ke user (admin/operator) yang memproses pembayaran.
      */
     public function user()
     {
@@ -38,10 +43,15 @@ class Pembayaran extends Model
     }
 
     /**
-     * Relasi ke pemesanan (jika pembayaran terkait pemesanan).
+     * Relasi ke konsumen (menggunakan no_identitas sebagai foreign key).
      */
-    public function pemesanan()
+    public function konsumen()
     {
-        return $this->belongsTo(Pemesanan::class, 'pemesanan_id');
+       return $this->belongsTo(\App\Models\Konsumen::class, 'konsumen_id', 'no_identitas');
     }
+
+    /**
+     * Relasi ke pemesanan (jika terkait booking).
+     */
+   
 }

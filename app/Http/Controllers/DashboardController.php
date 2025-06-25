@@ -1,37 +1,32 @@
 <?php
 
+// app/Http/Controllers/DashboardController.php
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Pembayaran;
+use App\Models\Konsumen;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $totalUsers = User::where('role', 'user')->count(); // Ganti nama variabel agar sama dengan compact()
-
+        $totalPengguna = Konsumen::count();
         $totalPembayaran = Pembayaran::count();
+        $totalPemasukan = Pembayaran::where('tipe', 'pemasukan')->sum('jumlah');
+        $totalPengeluaran = Pembayaran::where('tipe', 'pengeluaran')->sum('jumlah');
 
-        $totalPemasukan = Pembayaran::where('tipe', 'Pemasukan')
-                                    ->where('status', 'Valid')
-                                    ->sum('jumlah');
+        $transaksiTerakhir = Pembayaran::with('konsumen')
+            ->orderBy('created_at', 'desc')
+            ->take(5)
+            ->get();
 
-        $totalPengeluaran = Pembayaran::where('tipe', 'Pengeluaran')
-                                      ->where('status', 'Valid')
-                                      ->sum('jumlah');
+        return view('admin.index', compact(
+    'totalPengguna',
+    'totalPembayaran',
+    'totalPemasukan',
+    'totalPengeluaran',
+    'transaksiTerakhir'
+));
 
-        $transaksiTerakhir = Pembayaran::with('user')
-                                       ->latest()
-                                       ->take(5)
-                                       ->get();
-
-        return view('admin.dashboard', compact(
-            'totalUsers',
-            'totalPembayaran',
-            'totalPemasukan',
-            'totalPengeluaran',
-            'transaksiTerakhir'
-        ));
     }
 }
